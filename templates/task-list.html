@@ -1,0 +1,10 @@
+<html>
+<h1>Task List</h1>
+<!-- render tasks using gin html -->
+<ul>
+  {{ range $index, $task := .tasks }}
+  <li>({{$task.Status}}) {{ $task.Name }}</li>
+  {{ end }}
+</ul>
+
+</html>
