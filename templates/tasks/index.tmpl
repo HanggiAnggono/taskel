@@ -1,0 +1,15 @@
+{{define "tasks/index"}}
+<html>
+{{ template "head" . }}
+
+<div>
+  <h1>Task List</h1>
+  <ul>
+    {{ range $index, $task := .tasks }}
+    <li>({{$task.Status}}) {{ $task.Name }}</li>
+    {{ end }}
+  </ul>
+</div>
+
+</html>
+{{end}}

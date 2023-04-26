@@ -12,7 +12,7 @@ func main() {
 	db.Connect()
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("templates/**/*")
 
 	taskHandler := handler.TaskHandler{}
 
@@ -30,7 +30,11 @@ func main() {
 	// endpoint to transition task status
 	r.POST("/api/task/:id/transition", taskHandler.TransitionTask)
 
+	authHandler := handler.AuthHandler{}
+	r.POST("/api/login", authHandler.Login)
+
 	taskViewHandler := handler.TaskViewHandler{}
+	r.GET("/login", authHandler.LoginView)
 	r.GET("/", taskViewHandler.List)
 
 	r.Run()

@@ -1,0 +1,48 @@
+{{define "auth/login"}}
+<html>
+{{ template "head" . }}
+
+<body>
+  <div class="container p-5">
+    <div class="card">
+      <div class="card-header">
+        Login Form
+      </div>
+      <div class="card-body">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" class="form-control" id="username" name="username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" class="form-control" id="password" name="password">
+          </div>
+          <button type="submit" id="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  $(document).ready(function () {
+    $('#loginForm').submit(function (e) {
+      e.preventDefault();
+      $('#submit').prop('disabled', true);
+      axios.post('/api/login', {
+        username: $('#username').val(),
+        password: $('#password').val()
+      }).then(function (response) {
+        console.log(response);
+      }).catch(function (error) {
+        console.log(error);
+      }).then(function () {
+        $('#submit').prop('disabled', false);
+      })
+    })
+  })
+</script>
+
+</html>
+{{end}}

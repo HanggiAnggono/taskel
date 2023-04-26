@@ -32,7 +32,8 @@ func Seed() {
 	for i := 0; i < 10; i++ {
 		email := faker.Email()
 		firstName := faker.FirstName()
-		user := model.User{Name: firstName, Username: strings.ToLower(firstName), Email: &email}
+		password, _ := model.UserHashPassword("123456")
+		user := model.User{Name: firstName, Username: strings.ToLower(firstName), Email: &email, Password: password}
 		DB.Create(&user)
 	}
 

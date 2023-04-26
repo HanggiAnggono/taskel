@@ -14,7 +14,8 @@ func (h *TaskViewHandler) List(c *gin.Context) {
 	var tasks []model.Task
 	db.DB.Find(&tasks)
 
-	c.HTML(http.StatusOK, "task-list.html", gin.H{
+	c.HTML(http.StatusOK, "tasks/index", gin.H{
+		"title": "My Tasks",
 		"tasks": tasks,
 	})
 }
