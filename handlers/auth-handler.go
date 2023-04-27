@@ -16,53 +16,70 @@ type AuthHandler struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" form:"username"`
+	Password string `json:"password" form:"password"`
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	reqBody := LoginRequest{}
-	c.Bind(&reqBody)
-
+	var errorMessage string
 	var user model.User
+	reqBody := LoginRequest{}
+	c.ShouldBind(&reqBody)
+
+	handleError := func() {
+		switch c.Request.Header.Get("Content-Type") {
+		case "application/json":
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": errorMessage,
+			})
+		default:
+			c.HTML(http.StatusBadRequest, "auth/login", gin.H{
+				"title": "Login",
+				"error": errorMessage,
+			})
+		}
+	}
+
 	db.DB.Where("username = ?", reqBody.Username).First(&user)
 
 	if user.ID == 0 {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"status":  "error",
-			"message": "user not found",
-		})
-	} else {
-		if model.UserComparePassword(reqBody.Password, user.Password) {
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-				"user_id":  user.ID,
-				"username": user.Username,
-				"exp":      time.Now().Add(time.Hour * 72).Unix(),
-			})
+		errorMessage = "user not found"
+		handleError()
+		return
+	}
 
-			tokenString, err := token.SignedString([]byte(config.Config.JWTSecret))
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"status":  "error",
-					"message": fmt.Sprintf("failed to sign token: %v", err),
-				})
-			} else {
-				// success
-				c.JSON(http.StatusOK, gin.H{
-					"data": gin.H{
-						"user":  user,
-						"token": tokenString,
-					},
-					"status":  http.StatusOK,
-					"message": "success",
-				})
-			}
-		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"status":  "error",
-				"message": "invalid password",
-			})
-		}
+	if !model.UserComparePassword(reqBody.Password, user.Password) {
+		errorMessage = "invalid password"
+		handleError()
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":  user.ID,
+		"username": user.Username,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(config.Config.JWTSecret))
+
+	if err != nil {
+		errorMessage = fmt.Sprintf("failed to sign token: %v", err)
+		handleError()
+		return
+	}
+
+	switch c.Request.Header.Get("Content-Type") {
+	case "application/json":
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "success",
+			"message": "login successful",
+			"user":    user,
+			"token":   tokenString,
+		})
+	default:
+		c.SetCookie("token", tokenString, 3600, "/", c.Request.Host, false, true)
+		c.Redirect(http.StatusFound, "/")
 	}
 }
 

@@ -42,6 +42,7 @@ func main() {
 
 	taskViewHandler := handler.TaskViewHandler{}
 	r.GET("/login", authHandler.LoginView)
+	r.POST("/login", authHandler.Login)
 	r.GET("/", authorizeJWT(), taskViewHandler.List)
 
 	r.Run()

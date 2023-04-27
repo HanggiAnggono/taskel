@@ -9,7 +9,10 @@
         Login Form
       </div>
       <div class="card-body">
-        <form id="loginForm">
+        {{ if .error }}
+        <div class="alert alert-danger">{{ .error }}</div>
+        {{ end }}
+        <form id="loginForm" action="/login" method="POST">
           <div class="form-group">
             <label for="username">Username:</label>
             <input type="text" class="form-control" id="username" name="username">
@@ -24,27 +27,6 @@
     </div>
   </div>
 </body>
-
-<script>
-  $(document).ready(function () {
-    $('#loginForm').submit(function (e) {
-      e.preventDefault();
-      $('#submit').prop('disabled', true);
-      axios.post('/api/login', {
-        username: $('#username').val(),
-        password: $('#password').val()
-      }).then(function (response) {
-        localStorage.setItem('token', response.data.data.token)
-        Cookies.set('token', response.data.data.token)
-        document.location = '/'
-      }).catch(function (error) {
-        console.log(error);
-      }).then(function () {
-        $('#submit').prop('disabled', false);
-      })
-    })
-  })
-</script>
 
 </html>
 {{end}}
