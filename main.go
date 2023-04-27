@@ -18,14 +18,19 @@ func main() {
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
 	r.Use(IsAuthenticatedMiddleware())
+
+	taskHandler := handler.TaskHandler{}
+	authHandler := handler.AuthHandler{}
+	taskViewHandler := handler.TaskViewHandler{}
 	r.SetFuncMap(template.FuncMap{
 		"IsAuthenticated": IsAuthenticated,
+		"StatusColor":     taskViewHandler.StatusColor,
 	})
 	r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")
+	app := r.Group("/")
+	app.Use(authorizeJWT())
 	api.Use(authorizeJWT())
-
-	taskHandler := handler.TaskHandler{}
 
 	r.GET("/db/seed", func(ctx *gin.Context) {
 		db.Seed()
@@ -36,19 +41,20 @@ func main() {
 
 	api.GET("/task/list", taskHandler.List)
 	api.GET("/task/:id", taskHandler.Show)
+	api.POST("/task", taskHandler.Create)
 	api.POST("/task/:id/assign", taskHandler.AssignUserToTask)
 	api.POST("/task/:id/unassign", taskHandler.AssignUserToTask)
 	// endpoint to transition task status
 	api.POST("/task/:id/transition", taskHandler.TransitionTask)
 
-	authHandler := handler.AuthHandler{}
 	r.POST("/api/login", authHandler.Login)
 
-	taskViewHandler := handler.TaskViewHandler{}
 	r.GET("/login", authHandler.LoginView)
-	r.POST("/login", authHandler.Login)
-	r.POST("/logout", authHandler.Logout)
-	r.GET("/", authorizeJWT(), taskViewHandler.List)
+	app.POST("/login", authHandler.Login)
+	app.POST("/logout", authHandler.Logout)
+	app.GET("/", taskViewHandler.List)
+	app.GET("/task/new", taskViewHandler.Create)
+	app.POST("/task/new", taskHandler.Create)
 
 	r.Run()
 }
@@ -79,12 +85,15 @@ func authorizeJWT() gin.HandlerFunc {
 			return []byte(config.Config.JWTSecret), nil
 		})
 
-		if !tokenParsed.Valid || err != nil {
+		claims, ok := tokenParsed.Claims.(jwt.MapClaims)
+
+		if !tokenParsed.Valid || err != nil || !ok {
 			abort()
 			return
 		}
 
 		c.Set("jwtToken", tokenParsed)
+		c.Set("userId", claims["userId"])
 		c.Next()
 	}
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"taskel/db"
@@ -49,6 +50,50 @@ func (h *TaskHandler) Show(c *gin.Context) {
 		"status":  http.StatusOK,
 		"message": "success",
 	})
+}
+
+type CreateRequest struct {
+	Title       string  `json:"title" form:"title"`
+	Status      string  `json:"status" form:"status"`
+	UserID      *uint   `json:"userId" form:"userId"`
+	Description *string `json:"description" form:"description"`
+}
+
+func (h *TaskHandler) Create(c *gin.Context) {
+	var req CreateRequest
+	c.ShouldBind(&req)
+
+	var task model.Task
+	task.Title = req.Title
+	task.Status = req.Status
+	task.Description = req.Description
+	task.UserID = req.UserID
+
+	db.DB.Save(&task)
+
+	// handle Error
+	if task.ID == 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "failed to create task",
+		})
+		return
+	}
+
+	content := c.Request.Header.Get("Content-Type")
+	fmt.Printf("Content %s\n", content)
+	switch content {
+	case "application/json":
+		c.JSON(http.StatusOK, gin.H{
+			"data":    task,
+			"status":  http.StatusOK,
+			"message": "success",
+		})
+	case "application/x-www-form-urlencoded":
+		c.Redirect(http.StatusMovedPermanently, "/")
+	default:
+		c.Redirect(http.StatusMovedPermanently, "/")
+	}
 }
 
 type AssignRequest struct {

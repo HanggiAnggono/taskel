@@ -15,7 +15,7 @@ var DB *gorm.DB
 var err error
 
 func Connect() {
-	var dsn string = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	var dsn string = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s client_encoding=UTF8 sslmode=disable",
 		config.Config.DBHost,
 		config.Config.DBPort,
 		config.Config.DBUser,
@@ -31,8 +31,8 @@ func Connect() {
 }
 
 func Reset() {
-	DB.Exec("DELETE FROM users")
 	DB.Exec("DELETE FROM tasks")
+	DB.Exec("DELETE FROM users")
 }
 
 func Seed() {
@@ -47,7 +47,7 @@ func Seed() {
 
 	// generate 15 fake tasks
 	for i := 0; i < 15; i++ {
-		task := model.Task{Name: faker.Sentence(), Status: "todo"}
+		task := model.Task{Title: faker.Sentence(), Status: "todo"}
 		DB.Create(&task)
 	}
 }

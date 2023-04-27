@@ -4,10 +4,16 @@
 
 {{ template "navbar" . }}
 
-<body class="bg-dark text-white">
+<style>
+  table {
+    font-size: 24px;
+  }
+</style>
+
+<body class="bg-dark">
   <div class="p-5">
-    <table>
-      <thead>
+    <table class="table">
+      <thead class="text-white">
         <tr>
           <th>Name</th>
           <th>Status</th>
@@ -15,9 +21,11 @@
       <tbody>
         {{ range $index, $task := .tasks }}
         <tr>
-          <td>{{$task.Name}}</td>
           <td>
-            <span class="badge bg-primary rounded-pill">{{$task.Status}}</span>
+            <a href="/task/{{ $task.ID }}" class="text-decoration-none">{{$task.Title}}</a>
+          </td>
+          <td>
+            <span class="badge {{ StatusColor $task.Status }} rounded-pill">{{$task.Status}}</span>
           </td>
         </tr>
         {{ end }}

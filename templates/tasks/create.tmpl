@@ -1,0 +1,56 @@
+{{ define "tasks/create" }}
+<html>
+{{ template "head" . }}
+
+{{ template "navbar" . }}
+
+<body class="bg-dark text-white">
+  <div class="container">
+    <div class="card bg-dark shadow">
+      <div class="card-header">
+        Create Task
+      </div>
+      <div class="card-body">
+        {{ if .error }}
+        <div class="alert alert-danger">{{ .error }}</div>
+        {{ end }}
+        <form id="createTaskForm" action="/task/new" method="POST">
+          <div class="row">
+            <div class="col-12 form-group">
+              <label for="title">Title:</label>
+              <input type="text" class="form-control" id="title" name="title">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 form-group">
+              <label for="status">Assignee:</label>
+              <select name="userId" id="" class="form-control">
+                {{ range $index, $user := .users }}
+                <option value="{{ $user.ID }}">{{ $user.Name }}</option>
+                {{ end }}
+              </select>
+            </div>
+            <div class="col-6 form-group">
+              <label for="status">Status:</label>
+              <select name="status" id="" class="form-control">
+                {{ range $index, $status := .taskStatus }}
+                <option value="{{ $status }}">{{ $status }}</option>
+                {{ end }}
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 form-group">
+              <label for="description">Description</label>
+              <textarea name="description" id="" cols="30" rows="10" class="form-control"></textarea>
+            </div>
+          </div>
+          <button type="submit" id="submit" class="btn btn-primary">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+{{ end }}
