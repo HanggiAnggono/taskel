@@ -10,22 +10,30 @@
   }
 </style>
 
-<body class="bg-dark">
+<body>
   <div class="p-5">
     <table class="table">
-      <thead class="text-white">
+      <thead class=" ">
         <tr>
           <th>Name</th>
           <th>Status</th>
+          <th>Assignee</th>
       </thead>
       <tbody>
         {{ range $index, $task := .tasks }}
         <tr>
           <td>
-            <a href="/task/{{ $task.ID }}" class="text-decoration-none">{{$task.Title}}</a>
+            <a href="/task/{{ $task.ID }}"
+              class="text-decoration-none">{{$task.Title}}</a>
           </td>
           <td>
-            <span class="badge {{ StatusColor $task.Status }} rounded-pill">{{$task.Status}}</span>
+            <span
+              class="badge {{ StatusColor $task.Status }} rounded-pill">{{$task.StatusName}}</span>
+          </td>
+          <td>
+            {{ if ne $task.User nil }}
+            <a href="/user/{{ $task.User.ID }}">{{ $task.User.Name }}</a>
+            {{ end }}
           </td>
         </tr>
         {{ end }}

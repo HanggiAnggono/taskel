@@ -55,6 +55,7 @@ func main() {
 	app.GET("/", taskViewHandler.List)
 	app.GET("/task/new", taskViewHandler.Create)
 	app.POST("/task/new", taskHandler.Create)
+	app.GET("/task/:id", taskViewHandler.Show)
 
 	r.Run()
 }

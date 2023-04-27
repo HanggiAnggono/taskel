@@ -15,3 +15,14 @@ type Task struct {
 	UpdatedAt   time.Time
 	// DeletedAt 	gorm.DeletedAt
 }
+
+func (t *Task) StatusName() string {
+	switch t.Status {
+	case "inprogress":
+		return "In Progress"
+	case "done":
+		return "Done"
+	default:
+		return "To Do"
+	}
+}
