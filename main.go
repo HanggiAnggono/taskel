@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"taskel/config"
 	"taskel/db"
 	handler "taskel/handlers"
 	model "taskel/models"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	config.LoadConfig()
 	db.Connect()
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
@@ -69,7 +71,7 @@ func authorizeJWT() gin.HandlerFunc {
 		}
 
 		tokenParsed, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			return []byte("TASKELSECRET"), nil
+			return []byte(config.Config.JWTSecret), nil
 		})
 
 		if !tokenParsed.Valid || err != nil {

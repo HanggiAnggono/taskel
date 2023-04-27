@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"strings"
+	config "taskel/config"
 	model "taskel/models"
 
 	"github.com/go-faker/faker/v4"
@@ -14,7 +15,14 @@ var DB *gorm.DB
 var err error
 
 func Connect() {
-	var dsn string = "host=localhost user=postgres password=postgres dbname=taskel_dev port=5432 client_encoding=utf8"
+	var dsn string = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		config.Config.DBHost,
+		config.Config.DBPort,
+		config.Config.DBUser,
+		config.Config.DBPassword,
+		config.Config.DBName,
+	)
+
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {

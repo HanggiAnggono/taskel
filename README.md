@@ -1,0 +1,5 @@
+- Gin
+- gorm, postgres
+- faker
+- jwt-go
+- godotenv

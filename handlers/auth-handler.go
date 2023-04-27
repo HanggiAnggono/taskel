@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"taskel/config"
 	"taskel/db"
 	model "taskel/models"
 	"time"
@@ -39,7 +40,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 				"exp":      time.Now().Add(time.Hour * 72).Unix(),
 			})
 
-			tokenString, err := token.SignedString([]byte("TASKELSECRET"))
+			tokenString, err := token.SignedString([]byte(config.Config.JWTSecret))
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"status":  "error",
@@ -66,6 +67,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) LoginView(c *gin.Context) {
+	jwtToken, _ := c.Cookie("token")
+
+	if jwtToken != "" {
+		c.Redirect(http.StatusMovedPermanently, "/")
+		return
+	}
+
 	c.HTML(http.StatusOK, "auth/login", gin.H{
 		"title": "Login",
 	})
