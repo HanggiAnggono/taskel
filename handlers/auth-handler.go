@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"taskel/db"
 	model "taskel/models"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,11 +33,29 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		})
 	} else {
 		if model.UserComparePassword(reqBody.Password, user.Password) {
-			c.JSON(http.StatusOK, gin.H{
-				"data":    user,
-				"status":  http.StatusOK,
-				"message": "success",
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+				"user_id":  user.ID,
+				"username": user.Username,
+				"exp":      time.Now().Add(time.Hour * 72).Unix(),
 			})
+
+			tokenString, err := token.SignedString([]byte("TASKELSECRET"))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"status":  "error",
+					"message": fmt.Sprintf("failed to sign token: %v", err),
+				})
+			} else {
+				// success
+				c.JSON(http.StatusOK, gin.H{
+					"data": gin.H{
+						"user":  user,
+						"token": tokenString,
+					},
+					"status":  http.StatusOK,
+					"message": "success",
+				})
+			}
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"status":  "error",

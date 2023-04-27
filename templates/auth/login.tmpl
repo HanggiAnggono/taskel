@@ -34,7 +34,9 @@
         username: $('#username').val(),
         password: $('#password').val()
       }).then(function (response) {
-        console.log(response);
+        localStorage.setItem('token', response.data.data.token)
+        Cookies.set('token', response.data.data.token)
+        document.location = '/'
       }).catch(function (error) {
         console.log(error);
       }).then(function () {

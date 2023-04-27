@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
 	"taskel/db"
 	handler "taskel/handlers"
 	model "taskel/models"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +16,8 @@ func main() {
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/**/*")
+	api := r.Group("/api")
+	api.Use(authorizeJWT())
 
 	taskHandler := handler.TaskHandler{}
 
@@ -23,19 +28,55 @@ func main() {
 		db.Reset()
 	})
 
-	r.GET("/api/task/list", taskHandler.List)
-	r.GET("/api/task/:id", taskHandler.Show)
-	r.POST("/api/task/:id/assign", taskHandler.AssignUserToTask)
-	r.POST("/api/task/:id/unassign", taskHandler.AssignUserToTask)
+	api.GET("/task/list", taskHandler.List)
+	api.GET("/task/:id", taskHandler.Show)
+	api.POST("/task/:id/assign", taskHandler.AssignUserToTask)
+	api.POST("/task/:id/unassign", taskHandler.AssignUserToTask)
 	// endpoint to transition task status
-	r.POST("/api/task/:id/transition", taskHandler.TransitionTask)
+	api.POST("/task/:id/transition", taskHandler.TransitionTask)
 
 	authHandler := handler.AuthHandler{}
 	r.POST("/api/login", authHandler.Login)
 
 	taskViewHandler := handler.TaskViewHandler{}
 	r.GET("/login", authHandler.LoginView)
-	r.GET("/", taskViewHandler.List)
+	r.GET("/", authorizeJWT(), taskViewHandler.List)
 
 	r.Run()
+}
+
+func authorizeJWT() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenStr, err := c.Cookie("token")
+
+		abort := func() {
+			fmt.Print("TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN \n", err)
+			contentType := c.Request.Header.Get("Content-Type")
+			if contentType == "application/json" {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"status":  "error",
+					"message": "unauthorized",
+				})
+			} else {
+				c.Redirect(http.StatusMovedPermanently, "/login")
+			}
+			return
+		}
+
+		if err != nil || tokenStr == "" {
+			abort()
+			return
+		}
+
+		tokenParsed, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+			return []byte("TASKELSECRET"), nil
+		})
+
+		if !tokenParsed.Valid || err != nil {
+			abort()
+			return
+		}
+
+		c.Next()
+	}
 }
