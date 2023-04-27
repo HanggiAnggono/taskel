@@ -83,6 +83,22 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 }
 
+func (h *AuthHandler) Logout(c *gin.Context) {
+	accept := c.Request.Header.Get("Accept")
+	c.SetCookie("token", "", -1, "/", c.Request.Host, false, true)
+
+	switch accept {
+	case "application/json":
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "success",
+			"message": "logout successful",
+		})
+	case "text/html":
+	default:
+		c.Redirect(http.StatusFound, "/login")
+	}
+}
+
 func (h *AuthHandler) LoginView(c *gin.Context) {
 	jwtToken, _ := c.Cookie("token")
 

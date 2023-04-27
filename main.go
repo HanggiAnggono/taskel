@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"net/http"
 	"taskel/config"
 	"taskel/db"
@@ -17,6 +17,10 @@ func main() {
 	db.Connect()
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
+	r.Use(IsAuthenticatedMiddleware())
+	r.SetFuncMap(template.FuncMap{
+		"IsAuthenticated": IsAuthenticated,
+	})
 	r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")
 	api.Use(authorizeJWT())
@@ -43,6 +47,7 @@ func main() {
 	taskViewHandler := handler.TaskViewHandler{}
 	r.GET("/login", authHandler.LoginView)
 	r.POST("/login", authHandler.Login)
+	r.POST("/logout", authHandler.Logout)
 	r.GET("/", authorizeJWT(), taskViewHandler.List)
 
 	r.Run()
@@ -53,7 +58,6 @@ func authorizeJWT() gin.HandlerFunc {
 		tokenStr, err := c.Cookie("token")
 
 		abort := func() {
-			fmt.Print("TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN TOKEN \n", err)
 			contentType := c.Request.Header.Get("Content-Type")
 			if contentType == "application/json" {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -80,6 +84,21 @@ func authorizeJWT() gin.HandlerFunc {
 			return
 		}
 
+		c.Set("jwtToken", tokenParsed)
 		c.Next()
 	}
+}
+
+var isAuthed bool
+
+func IsAuthenticatedMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, _ := c.Cookie("token")
+		isAuthed = token != ""
+		c.Next()
+	}
+}
+
+func IsAuthenticated() bool {
+	return isAuthed
 }

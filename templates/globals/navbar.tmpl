@@ -1,0 +1,23 @@
+{{ define "navbar" }}
+{{ if IsAuthenticated }}
+<nav class="navbar navbar-expand-sm navbar-light bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">TASKEL</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarID" aria-controls="navbarID"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarID">
+      <div class="navbar-nav">
+        <a class="nav-link" aria-current="page" href="/">Tasks</a>
+        <a class="nav-link" href="#"
+          onclick="event.preventDefault(); document.getElementById('logoutForm').submit()">Logout</a>
+        <form id="logoutForm" action="/logout" method="POST" class="d-none">
+        </form>
+
+      </div>
+    </div>
+  </div>
+</nav>
+{{ end}}
+{{ end }}
