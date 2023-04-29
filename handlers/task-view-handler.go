@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"math"
 	"net/http"
 	"taskel/db"
 	model "taskel/models"
@@ -22,9 +23,26 @@ func (h *TaskViewHandler) List(c *gin.Context) {
 	offset := (request.Page - 1) * request.PageSize
 	db.DB.Preload("User").Limit(request.PageSize).Offset(offset).Find(&tasks)
 
+	var totalItems int64
+	db.DB.Model(&model.Task{}).Count(&totalItems)
+	totalPageFloat := math.Ceil(float64(totalItems) / float64(request.PageSize))
+	totalPage := int(totalPageFloat)
+	pages := make([]int, totalPage)
+	for i := 0; i < totalPage; i++ {
+		pages[i] = i + 1
+	}
+
 	c.HTML(http.StatusOK, "tasks/index", gin.H{
-		"title": "My Tasks",
-		"tasks": tasks,
+		"title":      "My Tasks",
+		"tasks":      tasks,
+		"page":       request.Page,
+		"pageSize":   request.PageSize,
+		"totalPage":  totalPage,
+		"totalItems": totalItems,
+		"start":      offset + 1,
+		"end":        offset + len(tasks),
+		"current":    request.Page,
+		"pages":      pages,
 	})
 }
 
