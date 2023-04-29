@@ -78,7 +78,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			"token":   tokenString,
 		})
 	default:
-		c.SetCookie("token", tokenString, 3600, "/", c.Request.Host, false, true)
+		c.SetCookie("token", tokenString, 3600*48 /* 48 jam */, "/", c.Request.Host, false, true)
 		c.Redirect(http.StatusFound, "/")
 	}
 }

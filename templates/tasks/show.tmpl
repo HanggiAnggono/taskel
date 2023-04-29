@@ -12,6 +12,8 @@
       {{ $task.Title }}
       <span class="badge {{ StatusColor $task.Status }}">{{
         $task.Status}}</span>
+
+      <a href="{{ $task.ID }}/edit">EDIT</a>
     </h1>
 
     <h3>

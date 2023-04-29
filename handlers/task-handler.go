@@ -96,6 +96,45 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	}
 }
 
+type EditRequest struct {
+	Title       string  `json:"title" form:"title"`
+	Status      string  `json:"status" form:"status"`
+	Description *string `json:"description" form:"description"`
+	UserID      *uint   `json:"userId" form:"userId"`
+}
+
+func (h *TaskHandler) Edit(c *gin.Context) {
+	id := c.Param("id")
+	req := EditRequest{}
+	var task model.Task
+	c.ShouldBind(&req)
+
+	db.DB.First(&task, id)
+
+	task.Title = req.Title
+	task.Status = req.Status
+	task.Description = req.Description
+	task.UserID = req.UserID
+
+	db.DB.Save(&task)
+
+	switch c.Request.Header.Get("Content-Type") {
+	case "application/json":
+		c.JSON(http.StatusOK, gin.H{
+			"data":    task,
+			"status":  http.StatusOK,
+			"message": "success",
+		})
+	case "application/x-www-form-urlencoded":
+		taskViewHandler := TaskViewHandler{}
+		c.Set("flash", "success")
+		taskViewHandler.Edit(c)
+	default:
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/task/%s/edit", id))
+	}
+
+}
+
 type AssignRequest struct {
 	UserID *uint `json:"userId"`
 }

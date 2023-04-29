@@ -10,9 +10,17 @@ import (
 
 type TaskViewHandler struct{}
 
+type TaskListRequest struct {
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"pageSize,default=10"`
+}
+
 func (h *TaskViewHandler) List(c *gin.Context) {
 	var tasks []model.Task
-	db.DB.Preload("User").Find(&tasks)
+	var request TaskListRequest
+	c.ShouldBind(&request)
+	offset := (request.Page - 1) * request.PageSize
+	db.DB.Preload("User").Limit(request.PageSize).Offset(offset).Find(&tasks)
 
 	c.HTML(http.StatusOK, "tasks/index", gin.H{
 		"title": "My Tasks",
@@ -75,5 +83,22 @@ func (h *TaskViewHandler) Create(c *gin.Context) {
 		"title":      "Create Task",
 		"taskStatus": []string{"todo", "inprogress", "done"},
 		"users":      users,
+	})
+}
+
+func (h *TaskViewHandler) Edit(c *gin.Context) {
+	var users []model.User
+	var task model.Task
+	db.DB.Find(&users)
+	db.DB.Preload("User").First(&task, c.Param("id"))
+
+	flash, _ := c.Get("flash")
+
+	c.HTML(http.StatusOK, "tasks/edit", gin.H{
+		"title":      task.Title,
+		"task":       task,
+		"taskStatus": []string{"todo", "inprogress", "done"},
+		"users":      users,
+		"flash":      flash,
 	})
 }
