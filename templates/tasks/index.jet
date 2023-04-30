@@ -1,0 +1,35 @@
+{{ extends "application.jet" }}
+{{ block body() }}
+<style>
+  table {
+    font-size: 24px;
+  }
+</style>
+
+<div class="p-5">
+  <table class="table">
+    <thead class=" ">
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Assignee</th>
+    </thead>
+    <tbody>
+      {{ range task := tasks}}
+      <tr>
+        <td>{{ task.Title }}</td>
+        <td>
+          <span class="badge {{task.StatusColor()}} rounded-pill">
+            {{task.StatusName() }}</span>
+        </td>
+        <td>
+          {{ if task.User }}
+          <a href="/user/{{ task.User.ID }}">{{ task.User.Name }}</a>
+          {{ end }}
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ end }}

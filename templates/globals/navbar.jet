@@ -1,5 +1,5 @@
-{{ define "navbar" }}
-{{ if IsAuthenticated }}
+{{ block navbar() }}
+{{ if IsAuthenticated() }}
 <nav class="navbar navbar-expand-sm navbar-light ">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">TASKEL</a>
@@ -23,5 +23,5 @@
     </div>
   </div>
 </nav>
-{{ end}}
+{{ end }}
 {{ end }}

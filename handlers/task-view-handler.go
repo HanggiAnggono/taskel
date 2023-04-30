@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"taskel/db"
 	model "taskel/models"
+	"taskel/view"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +33,7 @@ func (h *TaskViewHandler) List(c *gin.Context) {
 		pages[i] = i + 1
 	}
 
-	c.HTML(http.StatusOK, "tasks/index", gin.H{
+	view.HTML(c, http.StatusOK, "tasks/index.jet", gin.H{
 		"title":      "My Tasks",
 		"tasks":      tasks,
 		"page":       request.Page,

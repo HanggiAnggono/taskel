@@ -6,6 +6,7 @@ import (
 	"taskel/config"
 	"taskel/db"
 	model "taskel/models"
+	view "taskel/view"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -107,7 +108,8 @@ func (h *AuthHandler) LoginView(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "auth/login", gin.H{
+	view.HTML(c, http.StatusOK, "login.jet", gin.H{
 		"title": "Login",
+		"error": nil,
 	})
 }

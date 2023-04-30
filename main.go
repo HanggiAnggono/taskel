@@ -7,6 +7,7 @@ import (
 	"taskel/db"
 	handler "taskel/handlers"
 	model "taskel/models"
+	"taskel/view"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,8 @@ func main() {
 	r := gin.Default()
 	r.Use(IsAuthenticatedMiddleware())
 
+	view.Init(r)
+
 	taskHandler := handler.TaskHandler{}
 	authHandler := handler.AuthHandler{}
 	taskViewHandler := handler.TaskViewHandler{}
@@ -26,7 +29,8 @@ func main() {
 		"IsAuthenticated": IsAuthenticated,
 		"StatusColor":     taskViewHandler.StatusColor,
 	})
-	r.LoadHTMLGlob("templates/**/*")
+	view.JetView.AddGlobal("IsAuthenticated", IsAuthenticated)
+	// r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")
 	app := r.Group("/")
 	app.Use(authorizeJWT())

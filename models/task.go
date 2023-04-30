@@ -26,3 +26,14 @@ func (t *Task) StatusName() string {
 		return "To Do"
 	}
 }
+
+func (t *Task) StatusColor() string {
+	switch t.Status {
+	case "inprogress":
+		return "bg-warning"
+	case "done":
+		return "bg-success"
+	default:
+		return "bg-secondary"
+	}
+}
