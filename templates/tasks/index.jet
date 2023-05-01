@@ -1,4 +1,5 @@
 {{ extends "application.jet" }}
+{{ import "globals/pagination" }}
 {{ block body() }}
 <style>
   table {
@@ -15,9 +16,12 @@
         <th>Assignee</th>
     </thead>
     <tbody>
-      {{ range task := tasks}}
+      {{ range task := .tasks}}
       <tr>
-        <td>{{ task.Title }}</td>
+        <td>
+          <a href="/task/{{ task.ID }}"
+            class="text-decoration-none">{{task.Title}}</a>
+        </td>
         <td>
           <span class="badge {{task.StatusColor()}} rounded-pill">
             {{task.StatusName() }}</span>
@@ -31,5 +35,6 @@
       {{ end }}
     </tbody>
   </table>
+  {{ yield pagination() . }}
 </div>
 {{ end }}

@@ -35,10 +35,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 				"message": errorMessage,
 			})
 		default:
-			c.HTML(http.StatusBadRequest, "auth/login", gin.H{
+			view.HTML(c, http.StatusBadRequest, "auth/login", gin.H{
 				"title": "Login",
 				"error": errorMessage,
-			})
+			}, nil)
 		}
 	}
 
@@ -111,5 +111,5 @@ func (h *AuthHandler) LoginView(c *gin.Context) {
 	view.HTML(c, http.StatusOK, "login.jet", gin.H{
 		"title": "Login",
 		"error": nil,
-	})
+	}, nil)
 }

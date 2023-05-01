@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"net/http"
 	"taskel/config"
 	"taskel/db"
@@ -25,10 +24,6 @@ func main() {
 	taskHandler := handler.TaskHandler{}
 	authHandler := handler.AuthHandler{}
 	taskViewHandler := handler.TaskViewHandler{}
-	r.SetFuncMap(template.FuncMap{
-		"IsAuthenticated": IsAuthenticated,
-		"StatusColor":     taskViewHandler.StatusColor,
-	})
 	view.JetView.AddGlobal("IsAuthenticated", IsAuthenticated)
 	// r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")

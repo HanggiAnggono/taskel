@@ -6,7 +6,7 @@
       Login Form
     </div>
     <div class="card-body">
-      {{ if .error }}
+      {{ if isset(.error) }}
       <div class="alert alert-danger">{{ .error }}</div>
       {{ end }}
       <form id="loginForm" action="/login" method="POST">

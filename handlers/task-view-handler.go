@@ -28,10 +28,6 @@ func (h *TaskViewHandler) List(c *gin.Context) {
 	db.DB.Model(&model.Task{}).Count(&totalItems)
 	totalPageFloat := math.Ceil(float64(totalItems) / float64(request.PageSize))
 	totalPage := int(totalPageFloat)
-	pages := make([]int, totalPage)
-	for i := 0; i < totalPage; i++ {
-		pages[i] = i + 1
-	}
 
 	view.HTML(c, http.StatusOK, "tasks/index.jet", gin.H{
 		"title":      "My Tasks",
@@ -40,11 +36,7 @@ func (h *TaskViewHandler) List(c *gin.Context) {
 		"pageSize":   request.PageSize,
 		"totalPage":  totalPage,
 		"totalItems": totalItems,
-		"start":      offset + 1,
-		"end":        offset + len(tasks),
-		"current":    request.Page,
-		"pages":      pages,
-	})
+	}, nil)
 }
 
 func (h *TaskViewHandler) StatusColor(status string) string {
