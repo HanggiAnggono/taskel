@@ -1,0 +1,26 @@
+{{ extends "application.jet" }}
+
+{{ block body() }}
+
+{{ task := .task }}
+<div class="container">
+  <h1>
+    {{ .task.Title }}
+    <span class="badge {{ .task.StatusColor() }}">{{.task.Status}}</span>
+  </h1>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="mb-3">
+        <a href="/task/{{ .task.ID }}/edit">Edit</a>
+      </div>
+      <h5 class="card-title">{{ .task.Title }}</h5>
+      <h6 class="card-subtitle mb-2 text-muted ">
+        Assignee: {{ if .task.UserID != nil }} <a
+          href="/user/{{ .task.UserID }}">{{ .task.User.Name }}</a> {{ end }}
+      </h6>
+      <p class="card-text">{{ .task.Description }}</p>
+    </div>
+  </div>
+</div>
+{{ end }}

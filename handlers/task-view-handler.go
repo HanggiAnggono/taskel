@@ -53,7 +53,7 @@ func (h *TaskViewHandler) StatusColor(status string) string {
 func (h *TaskViewHandler) Show(c *gin.Context) {
 	id := c.Param("id")
 
-	var task model.Task
+	var task *model.Task
 	db.DB.Preload("User").First(&task, id)
 
 	accept := c.Request.Header.Get("Accept")
@@ -79,10 +79,10 @@ func (h *TaskViewHandler) Show(c *gin.Context) {
 			"message": "success",
 		})
 	default:
-		c.HTML(http.StatusOK, "tasks/show", gin.H{
+		view.HTML(c, http.StatusOK, "tasks/show.jet", gin.H{
 			"title": task.Title,
 			"task":  task,
-		})
+		}, nil)
 	}
 }
 

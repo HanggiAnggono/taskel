@@ -1,8 +1,8 @@
 {{ import "globals/flash.jet" }}
 {{ block taskForm(task=nil) }}
 
-<form id="taskForm" action="{{ task.ID != 0 ? "/task/{{ task.ID }}edit" : "/task/new" }}"
-  method="POST">
+{{ action := "/task/"+task.ID+"/edit" }}
+<form id="taskForm" action="{{ action }}" method="POST">
   {{ yield flash() }}
   <div class="row">
     <div class="col-12 form-group">

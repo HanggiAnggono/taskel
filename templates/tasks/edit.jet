@@ -1,4 +1,5 @@
 {{ extends "application.jet" }}
+{{ import "tasks/form.jet" }}
 
 {{ block body() }}
 <div class="container">
@@ -7,7 +8,7 @@
       Edit Task
     </div>
     <div class="card-body">
-      {{ if .error }}
+      {{ if isset(.error) }}
       <div class="alert alert-danger">{{ .error }}</div>
       {{ end }}
       {{ yield taskForm(task=.task) }}
