@@ -8,7 +8,7 @@ import (
 var JetView *jet.Set
 
 func Init(r *gin.Engine) {
-	JetView = jet.NewHTMLSet("./templates", "./templates/auth", "./templates/globals")
+	JetView = jet.NewHTMLSet("./templates", "./templates/auth", "./templates/tasks", "./templates/globals")
 }
 
 func HTML(c *gin.Context, code int, template string, data map[string]interface{}, varmap jet.VarMap) {

@@ -1,0 +1,17 @@
+{{ extends "application.jet" }}
+
+{{ block body() }}
+<div class="container">
+  <div class="card shadow">
+    <div class="card-header">
+      Edit Task
+    </div>
+    <div class="card-body">
+      {{ if .error }}
+      <div class="alert alert-danger">{{ .error }}</div>
+      {{ end }}
+      {{ yield taskForm(task=.task) }}
+    </div>
+  </div>
+</div>
+{{ end }}

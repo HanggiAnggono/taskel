@@ -90,11 +90,14 @@ func (h *TaskViewHandler) Create(c *gin.Context) {
 	var users []model.User
 	db.DB.Find(&users)
 
-	c.HTML(http.StatusOK, "tasks/create", gin.H{
+	task := model.Task{}
+
+	view.HTML(c, http.StatusOK, "tasks/create.jet", gin.H{
 		"title":      "Create Task",
 		"taskStatus": []string{"todo", "inprogress", "done"},
 		"users":      users,
-	})
+		"task":       task,
+	}, nil)
 }
 
 func (h *TaskViewHandler) Edit(c *gin.Context) {
@@ -105,11 +108,11 @@ func (h *TaskViewHandler) Edit(c *gin.Context) {
 
 	flash, _ := c.Get("flash")
 
-	c.HTML(http.StatusOK, "tasks/edit", gin.H{
+	view.HTML(c, http.StatusOK, "tasks/edit.jet", gin.H{
 		"title":      task.Title,
 		"task":       task,
 		"taskStatus": []string{"todo", "inprogress", "done"},
 		"users":      users,
 		"flash":      flash,
-	})
+	}, nil)
 }

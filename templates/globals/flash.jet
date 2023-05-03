@@ -1,5 +1,5 @@
-{{ define "flash" }}
-{{ if ne .flash nil }}
+{{ block flash() }}
+{{ if isset(.flash) && .flash != nil }}
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
   {{ .flash }}
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
