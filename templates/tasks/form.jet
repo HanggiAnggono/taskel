@@ -1,0 +1,49 @@
+{{ import "globals/flash.jet" }}
+{{ block taskForm(task=nil) }}
+
+<form id="taskForm" action="{{ task.ID != 0 ? "/task/{{ task.ID }}edit" : "/task/new" }}"
+  method="POST">
+  {{ yield flash() }}
+  <div class="row">
+    <div class="col-12 form-group">
+      <label for="title">Title:</label>
+      <input type="text" value="{{ task.Title }}" class="form-control"
+        id="title" name="title">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6 form-group">
+      <label for="status">Assignee:</label>
+      <select name="userId" id="" class="form-control">
+        <option value="">--Unassigned--</option>
+        {{ range user := .users }}
+        {{ selected := task.User && task.User.ID == user.ID}}
+        <option value="{{ user.ID }}" {{ if selected }}selected{{ end }}>
+          {{ user.Name }}</option>
+        {{ end }}
+      </select>
+    </div>
+    <div class="col-6 form-group">
+      <label for="status">Status:</label>
+      <select name="status" id="" class="form-control">
+        {{ range status := .taskStatus }}
+        {{ selected := task.Status == status}}
+        <option value="{{ status }}" {{ if selected }}selected{{ end }}>
+          {{status }}</option>
+        {{ end }}
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 form-group">
+      <label for="description">Description</label>
+      <textarea name="description" id="" cols="30" rows="10"
+        class="form-control">{{task.Description ? task.Description : ""}}</textarea>
+    </div>
+  </div>
+  <button type="submit" id="submit" class="btn btn-primary">
+    {{ if task.ID != 0 }}Update{{ else }}Create{{ end }}
+  </button>
+</form>
+
+{{ end }}
