@@ -15,11 +15,16 @@ var DB *gorm.DB
 var err error
 
 func Connect() {
-	var dsn string = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s client_encoding=UTF8 sslmode=disable",
+	password := fmt.Sprintf("password=%s", config.Config.DBPassword)
+	if (config.Config.DBPassword == "") {
+		password = ""
+	}
+
+	var dsn string = fmt.Sprintf("host=%s port=%s user=%s %s dbname=%s client_encoding=UTF8 sslmode=disable",
 		config.Config.DBHost,
 		config.Config.DBPort,
 		config.Config.DBUser,
-		config.Config.DBPassword,
+		password,
 		config.Config.DBName,
 	)
 
