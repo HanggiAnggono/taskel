@@ -45,6 +45,7 @@ func main() {
 	api.POST("/task/:id/unassign", taskHandler.AssignUserToTask)
 	// endpoint to transition task status
 	api.POST("/task/:id/transition", taskHandler.TransitionTask)
+	api.POST("/task/:id/watch", taskHandler.WatchTask)
 
 	r.POST("/api/login", authHandler.Login)
 
@@ -97,6 +98,7 @@ func authorizeJWT() gin.HandlerFunc {
 
 		c.Set("jwtToken", tokenParsed)
 		c.Set("userId", claims["userId"])
+		view.JetView.AddGlobal("UserID", claims["userId"])
 		c.Next()
 	}
 }

@@ -53,8 +53,12 @@ func (h *TaskViewHandler) StatusColor(status string) string {
 func (h *TaskViewHandler) Show(c *gin.Context) {
 	id := c.Param("id")
 
-	var task *model.Task
-	db.DB.Preload("User").First(&task, id)
+	var tasks []*model.Task
+	db.DB.Preload("User").Preload("Watchers").First(&tasks, id)
+	var task *model.Task;
+	if len(tasks) > 0 {
+		task = tasks[0]
+	}
 
 	accept := c.Request.Header.Get("Accept")
 

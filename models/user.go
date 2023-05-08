@@ -12,6 +12,7 @@ type User struct {
 	Name      string
 	Email     *string
 	Password  string `gorm:"type:varchar(255)"`
+	Watches   []*Task `gorm:"many2many:task_users"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

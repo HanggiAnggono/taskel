@@ -11,6 +11,7 @@ type Task struct {
 	Status      string
 	UserID      *uint
 	User        *User
+	Watchers    []*User `gorm:"many2many:task_users"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	// DeletedAt 	gorm.DeletedAt

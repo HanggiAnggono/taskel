@@ -2,10 +2,12 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"taskel/db"
 	model "taskel/models"
+	"taskel/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -190,4 +192,45 @@ func (h *TaskHandler) TransitionTask(c *gin.Context) {
 		"status":  http.StatusOK,
 		"message": "success",
 	})
+}
+
+type WatchTaskRequest struct {
+	UserID uint `json:"userId" form:"userId"`
+}
+
+func (h *TaskHandler) WatchTask(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	reqBody := WatchTaskRequest{}
+	c.ShouldBind(&reqBody)
+
+	err = repository.TaskWatch(uint(id), reqBody.UserID)
+	taskPath := fmt.Sprintf("/task/%d/edit", id);
+	log.Printf("taskPath %s\n", taskPath)
+
+	handleError := func() {
+		switch c.Request.Header.Get("Content-Type") {
+		case "application/json":
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		case "application/x-www-form-urlencoded":
+			c.Redirect(http.StatusMovedPermanently, taskPath)
+		}
+	}
+
+	if err != nil {
+		handleError()
+		return
+	}
+
+	switch c.Request.Header.Get("Content-Type") {
+	case "application/json":
+		c.JSON(http.StatusOK, gin.H{
+			"status":  http.StatusOK,
+			"message": "success",
+		})
+	case "application/x-www-form-urlencoded":
+		c.Redirect(http.StatusMovedPermanently, taskPath)
+	}
 }

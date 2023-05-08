@@ -12,14 +12,28 @@
   <div class="card">
     <div class="card-body">
       <div class="mb-3">
-        <a href="/task/{{ .task.ID }}/edit">Edit</a>
+        <a href="/task/{{ .task.ID }}/edit">Edit</a> |
+        <form id="watchForm" action="/api/task/{{ .task.ID }}/watch" method="POST" class="d-inline">
+          <input type="hidden" name="userId" value="{{ UserID }}">
+          <a href="#" onclick="document.querySelector('#watchForm').submit()">Watch</a>
+        </form>
       </div>
       <h5 class="card-title">{{ .task.Title }}</h5>
       <h6 class="card-subtitle mb-2 text-muted ">
-        Assignee: {{ if .task.UserID != nil }} <a
-          href="/user/{{ .task.UserID }}">{{ .task.User.Name }}</a> {{ end }}
-      </h6>
-      <p class="card-text">{{ .task.Description }}</p>
+        Assignee:
+        {{ if task.User }}
+        <a href="/user/{{ task.UserID }}">{{ task.User.Name }}</a>
+        {{ end }}
+        </h6>
+        <h6 class="card-subtitle mb-2 text-muted ">
+          Watchers:
+          {{ range .task.Watchers }}
+          <a href="/user/{{ .ID }}">{{ .Name }}</a>
+          {{ end }}
+        </h6>
+        <p class="card-text">
+          {{ .task.Description ? .task.Description : "" }}
+        </p>
     </div>
   </div>
 </div>
