@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"taskel/db"
+	"taskel/mail_service"
 	model "taskel/models"
 	"taskel/repository"
 
@@ -111,14 +112,27 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 	var task model.Task
 	c.ShouldBind(&req)
 
-	db.DB.First(&task, id)
+	db.DB.Preload("Watchers").First(&task, id)
 
+	// oldTask := task
 	task.Title = req.Title
 	task.Status = req.Status
 	task.Description = req.Description
-	task.UserID = req.UserID
+	if *req.UserID != 0 {
+		task.UserID = req.UserID
+	}
 
 	db.DB.Save(&task)
+
+	watcherEmails := []string{}
+	for _, watcher := range task.Watchers {
+		watcherEmails = append(watcherEmails, *watcher.Email)
+	}
+	mail_service.SendMail(
+		fmt.Sprintf("There has been update on %s", task.Title),
+		fmt.Sprintf("Title: %s\nStatus: %s\nDescription: %s", task.Title, task.Status, *task.Description),
+		watcherEmails...,
+	)
 
 	switch c.Request.Header.Get("Content-Type") {
 	case "application/json":
@@ -204,7 +218,7 @@ func (h *TaskHandler) WatchTask(c *gin.Context) {
 	c.ShouldBind(&reqBody)
 
 	err = repository.TaskWatch(uint(id), reqBody.UserID)
-	taskPath := fmt.Sprintf("/task/%d/edit", id);
+	taskPath := fmt.Sprintf("/task/%d", id)
 	log.Printf("taskPath %s\n", taskPath)
 
 	handleError := func() {

@@ -36,6 +36,7 @@ func Connect() {
 }
 
 func Reset() {
+	DB.Exec("DELETE FROM task_users")
 	DB.Exec("DELETE FROM tasks")
 	DB.Exec("DELETE FROM users")
 }
@@ -43,7 +44,7 @@ func Reset() {
 func Seed() {
 	// generate 10 fake Users
 	for i := 0; i < 10; i++ {
-		email := faker.Email()
+		email := fmt.Sprintf("hanggi_anggono+%d@yahoo.com", i)
 		firstName := faker.FirstName()
 		password, _ := model.UserHashPassword("123456")
 		user := model.User{Name: firstName, Username: strings.ToLower(firstName), Email: &email, Password: password}
