@@ -128,7 +128,8 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 	for _, watcher := range task.Watchers {
 		watcherEmails = append(watcherEmails, *watcher.Email)
 	}
-	mail_service.SendMail(
+
+	go mail_service.SendMail(
 		fmt.Sprintf("There has been update on %s", task.Title),
 		fmt.Sprintf("Title: %s\nStatus: %s\nDescription: %s", task.Title, task.Status, *task.Description),
 		watcherEmails...,
