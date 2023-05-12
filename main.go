@@ -24,7 +24,6 @@ func main() {
 	taskHandler := handler.TaskHandler{}
 	authHandler := handler.AuthHandler{}
 	taskViewHandler := handler.TaskViewHandler{}
-	view.JetView.AddGlobal("IsAuthenticated", IsAuthenticated)
 	// r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")
 	app := r.Group("/")
@@ -103,16 +102,10 @@ func authorizeJWT() gin.HandlerFunc {
 	}
 }
 
-var isAuthed bool
-
 func IsAuthenticatedMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, _ := c.Cookie("token")
-		isAuthed = token != ""
+		view.JetView.AddGlobal("IsAuthenticated", func() bool { return token != "" })
 		c.Next()
 	}
-}
-
-func IsAuthenticated() bool {
-	return isAuthed
 }
