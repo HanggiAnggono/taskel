@@ -12,9 +12,8 @@ const CONFIG_SMTP_PORT = 587
 const CONFIG_SENDER_NAME = "Taskel <anggonohanggi@gmail.com>"
 const CONFIG_AUTH_EMAIL = "anggonohanggi@gmail.com"
 
-var CONFIG_AUTH_PASSWORD = config.Config.EmailPassword
-
 func SendMail(subject string, body string, recipients ...string) {
+	var CONFIG_AUTH_PASSWORD = config.Config.EmailPassword
 	mailer := gomail.NewMessage()
 	mailer.SetHeader("From", CONFIG_SENDER_NAME)
 	mailer.SetHeader("To", recipients...)
