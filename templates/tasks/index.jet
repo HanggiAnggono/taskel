@@ -7,7 +7,11 @@
   }
 </style>
 
+<script type="text/babel" src="/js/hello.js">
+</script>
+
 <div class="p-5">
+  <div id="hello-world"></div>
   <table class="table">
     <thead class=" ">
       <tr>

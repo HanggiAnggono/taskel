@@ -17,6 +17,7 @@ func main() {
 	db.Connect()
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
+	r.Static("/js", "./js")
 	r.Use(IsAuthenticatedMiddleware())
 
 	view.Init(r)
