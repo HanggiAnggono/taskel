@@ -9,7 +9,6 @@ import (
 	"taskel/view"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +18,6 @@ func main() {
 	db.DB.AutoMigrate(&model.Task{}, &model.User{})
 	r := gin.Default()
 	r.Static("/js", "./js")
-	r.Use(cors.Default())
 	r.Use(IsAuthenticatedMiddleware())
 
 	view.Init(r)
