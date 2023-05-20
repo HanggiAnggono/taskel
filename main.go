@@ -39,13 +39,13 @@ func main() {
 	})
 
 	api.GET("/task/list", taskHandler.List)
-	api.GET("/task/:id", taskHandler.Show)
+	api.GET("/task/:key", taskHandler.Show)
 	api.POST("/task", taskHandler.Create)
-	api.POST("/task/:id/assign", taskHandler.AssignUserToTask)
-	api.POST("/task/:id/unassign", taskHandler.AssignUserToTask)
+	api.POST("/task/:key/assign", taskHandler.AssignUserToTask)
+	api.POST("/task/:key/unassign", taskHandler.AssignUserToTask)
 	// endpoint to transition task status
-	api.POST("/task/:id/transition", taskHandler.TransitionTask)
-	api.POST("/task/:id/watch", taskHandler.WatchTask)
+	api.POST("/task/:key/transition", taskHandler.TransitionTask)
+	api.POST("/task/:key/watch", taskHandler.WatchTask)
 
 	r.POST("/api/login", authHandler.Login)
 

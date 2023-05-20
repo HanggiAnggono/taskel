@@ -53,7 +53,8 @@ func Seed() {
 
 	// generate 15 fake tasks
 	for i := 0; i < 15; i++ {
-		task := model.Task{Title: faker.Sentence(), Status: "todo"}
+		Key := fmt.Sprintf("TASK-%d", i)
+		task := model.Task{Title: faker.Word(), Status: "todo", Key: Key}
 		DB.Create(&task)
 	}
 }

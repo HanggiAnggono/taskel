@@ -6,6 +6,7 @@ import (
 
 type Task struct {
 	ID          uint /* `gorm:"primaryKey"` */
+	Key      		string `gorm:"uniqueIndex"`
 	Title       string
 	Description *string
 	Status      string

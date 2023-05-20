@@ -36,15 +36,13 @@ func (h *TaskHandler) List(c *gin.Context) {
 }
 
 func (h *TaskHandler) Show(c *gin.Context) {
-	id := c.Param("id")
+	key := c.Param("key")
+	task, err := repository.GetTaskByIdOrKey(key)
 
-	var task model.Task
-	result := db.DB.First(&task, id)
-
-	if result.Error != nil {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"status":  "error",
-			"message": "task not found",
+			"message": err.Error(),
 		})
 	}
 
@@ -107,12 +105,12 @@ type EditRequest struct {
 }
 
 func (h *TaskHandler) Edit(c *gin.Context) {
-	id := c.Param("id")
+	key := c.Param("key")
 	req := EditRequest{}
 	var task model.Task
 	c.ShouldBind(&req)
 
-	db.DB.Preload("Watchers").First(&task, id)
+	db.DB.Preload("Watchers").Where("key = ?", key).First(&task)
 
 	// oldTask := task
 	task.Title = req.Title
@@ -147,7 +145,7 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 		c.Set("flash", "success")
 		taskViewHandler.Edit(c)
 	default:
-		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/task/%s/edit", id))
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/task/%s/edit", key))
 	}
 
 }
@@ -157,13 +155,13 @@ type AssignRequest struct {
 }
 
 func (h *TaskHandler) AssignUserToTask(c *gin.Context) {
-	id := c.Param("id")
+	key := c.Param("key")
 	reqBody := AssignRequest{}
 	c.BindJSON(&reqBody)
 	userId := reqBody.UserID
 
 	var task model.Task
-	db.DB.First(&task, id)
+	db.DB.Where("key = ?", key).First(&task)
 
 	tx := db.DB.Begin()
 	if userId != nil {
@@ -192,12 +190,12 @@ type TransitionRequest struct {
 }
 
 func (h *TaskHandler) TransitionTask(c *gin.Context) {
-	id := c.Param("id")
+	key := c.Param("key")
 	reqBody := TransitionRequest{}
 	c.BindJSON(&reqBody)
 
 	var task model.Task
-	db.DB.First(&task, id)
+	db.DB.Where("key = ?", key).First(&task)
 
 	task.Status = reqBody.Status
 	db.DB.Save(&task)
@@ -214,12 +212,12 @@ type WatchTaskRequest struct {
 }
 
 func (h *TaskHandler) WatchTask(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	key := c.Param("key")
 	reqBody := WatchTaskRequest{}
 	c.ShouldBind(&reqBody)
 
-	err = repository.TaskWatch(uint(id), reqBody.UserID)
-	taskPath := fmt.Sprintf("/task/%d", id)
+	err := repository.TaskWatch(key, reqBody.UserID)
+	taskPath := fmt.Sprintf("/task/%d", key)
 	log.Printf("taskPath %s\n", taskPath)
 
 	handleError := func() {
