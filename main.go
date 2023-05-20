@@ -24,6 +24,7 @@ func main() {
 
 	taskHandler := handler.TaskHandler{}
 	authHandler := handler.AuthHandler{}
+	userHandler := handler.UserHandler{}
 	taskViewHandler := handler.TaskViewHandler{}
 	// r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")
@@ -46,6 +47,9 @@ func main() {
 	// endpoint to transition task status
 	api.POST("/task/:key/transition", taskHandler.TransitionTask)
 	api.POST("/task/:key/watch", taskHandler.WatchTask)
+	api.PUT("/task/:key/edit", taskHandler.Edit)
+
+	api.GET("/user/list", userHandler.List)
 
 	r.POST("/api/login", authHandler.Login)
 

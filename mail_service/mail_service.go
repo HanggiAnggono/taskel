@@ -13,6 +13,7 @@ const CONFIG_SENDER_NAME = "Taskel <anggonohanggi@gmail.com>"
 const CONFIG_AUTH_EMAIL = "anggonohanggi@gmail.com"
 
 func SendMail(subject string, body string, recipients ...string) {
+	return
 	var CONFIG_AUTH_PASSWORD = config.Config.EmailPassword
 	mailer := gomail.NewMessage()
 	mailer.SetHeader("From", CONFIG_SENDER_NAME)

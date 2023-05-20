@@ -26,7 +26,7 @@ func (h *TaskHandler) List(c *gin.Context) {
 	}
 
 	var tasks []model.Task
-	db.DB.Limit(pageSize).Offset((page - 1) * pageSize).Find(&tasks)
+	db.DB.Limit(pageSize).Offset((page - 1) * pageSize).Preload("User").Find(&tasks)
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":    tasks,
@@ -105,6 +105,15 @@ type EditRequest struct {
 }
 
 func (h *TaskHandler) Edit(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": r,
+			})
+		}
+	}()
+
 	key := c.Param("key")
 	req := EditRequest{}
 	var task model.Task
@@ -113,10 +122,16 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 	db.DB.Preload("Watchers").Where("key = ?", key).First(&task)
 
 	// oldTask := task
-	task.Title = req.Title
-	task.Status = req.Status
-	task.Description = req.Description
-	if *req.UserID != 0 {
+	if (req.Title != "") && (req.Title != task.Title) {
+		task.Title = req.Title
+	}
+	if (req.Status != "") && (req.Status != task.Status) {
+		task.Status = req.Status
+	}
+	if req.Description != nil {
+		task.Description = req.Description
+	}
+	if (req.UserID != nil) && (req.UserID != task.UserID) {
 		task.UserID = req.UserID
 	}
 
