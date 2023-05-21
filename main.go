@@ -6,9 +6,9 @@ import (
 	"taskel/db"
 	handler "taskel/handlers"
 	model "taskel/models"
+	"taskel/service"
 	"taskel/view"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +24,7 @@ func main() {
 
 	taskHandler := handler.TaskHandler{}
 	authHandler := handler.AuthHandler{}
+	profileHandler := handler.ProfileHandler{}
 	userHandler := handler.UserHandler{}
 	taskViewHandler := handler.TaskViewHandler{}
 	// r.LoadHTMLGlob("templates/**/*")
@@ -39,6 +40,7 @@ func main() {
 		db.Reset()
 	})
 
+	api.GET("/profile", profileHandler.GetProfile)
 	api.GET("/task/list", taskHandler.List)
 	api.GET("/task/:key", taskHandler.Show)
 	api.POST("/task", taskHandler.Create)
@@ -69,36 +71,25 @@ func main() {
 
 func authorizeJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenStr, err := c.Cookie("token")
-
-		abort := func() {
-			contentType := c.Request.Header.Get("Content-Type")
-			if contentType == "application/json" {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"status":  "error",
-					"message": "unauthorized",
-				})
-			} else {
-				c.Redirect(http.StatusMovedPermanently, "/login")
+		defer func() {
+			if err := recover(); err != nil {
+				contentType := c.Request.Header.Get("Content-Type")
+				if contentType == "application/json" {
+					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+						"status":  "error",
+						"message": "unauthorized",
+					})
+				} else {
+					c.Redirect(http.StatusMovedPermanently, "/login")
+				}
+				return
 			}
-			return
-		}
+		}()
 
-		if err != nil || tokenStr == "" {
-			abort()
-			return
-		}
+		tokenStr, _ := c.Cookie("token")
 
-		tokenParsed, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			return []byte(config.Config.JWTSecret), nil
-		})
-
-		claims, ok := tokenParsed.Claims.(jwt.MapClaims)
-
-		if !tokenParsed.Valid || err != nil || !ok {
-			abort()
-			return
-		}
+		authService := service.AuthService{}
+		claims, tokenParsed, _ := authService.GetJWTClaims(tokenStr)
 
 		c.Set("jwtToken", tokenParsed)
 		c.Set("userId", claims["userId"])

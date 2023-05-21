@@ -3,13 +3,11 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"taskel/config"
 	"taskel/db"
 	model "taskel/models"
+	service "taskel/service"
 	view "taskel/view"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -56,13 +54,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId":   user.ID,
-		"username": user.Username,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(config.Config.JWTSecret))
+	authService := service.AuthService{}
+	tokenString, err := authService.GenerateJWTToken(user.ID, user.Username)
 
 	if err != nil {
 		errorMessage = fmt.Sprintf("failed to sign token: %v", err)
