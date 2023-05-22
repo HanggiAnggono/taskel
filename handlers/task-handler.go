@@ -98,8 +98,8 @@ func (h *TaskHandler) Create(c *gin.Context) {
 }
 
 type EditRequest struct {
-	Title       string  `json:"title" form:"title"`
-	Status      string  `json:"status" form:"status"`
+	Title       *string `json:"title" form:"title"`
+	Status      *string `json:"status" form:"status"`
 	Description *string `json:"description" form:"description"`
 	UserID      *uint   `json:"userId" form:"userId"`
 }
@@ -122,11 +122,11 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 	db.DB.Preload("Watchers").Where("key = ?", key).First(&task)
 
 	// oldTask := task
-	if (req.Title != "") && (req.Title != task.Title) {
-		task.Title = req.Title
+	if (req.Title != nil) && (req.Title != &task.Title) {
+		task.Title = *req.Title
 	}
-	if (req.Status != "") && (req.Status != task.Status) {
-		task.Status = req.Status
+	if (req.Status != nil) && (req.Status != &task.Status) {
+		task.Status = *req.Status
 	}
 	if req.Description != nil {
 		task.Description = req.Description
@@ -138,15 +138,19 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 	db.DB.Save(&task)
 
 	watcherEmails := []string{}
-	for _, watcher := range task.Watchers {
-		watcherEmails = append(watcherEmails, *watcher.Email)
+	if task.Watchers != nil {
+		for _, watcher := range task.Watchers {
+			watcherEmails = append(watcherEmails, *watcher.Email)
+		}
 	}
 
-	go mail_service.SendMail(
-		fmt.Sprintf("There has been update on %s", task.Title),
-		fmt.Sprintf("Title: %s\nStatus: %s\nDescription: %s", task.Title, task.Status, *task.Description),
-		watcherEmails...,
-	)
+	if len(watcherEmails) > 0 {
+		go mail_service.SendMail(
+			fmt.Sprintf("There has been update on %v", task.Title),
+			fmt.Sprintf("Title: %v\nStatus: %v\nDescription: %v", task.Title, task.Status, *task.Description),
+			watcherEmails...,
+		)
+	}
 
 	switch c.Request.Header.Get("Content-Type") {
 	case "application/json":
