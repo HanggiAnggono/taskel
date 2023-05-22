@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"taskel/db"
 	"taskel/mail_service"
 	model "taskel/models"
@@ -16,14 +15,16 @@ import (
 type TaskHandler struct{}
 
 func (h *TaskHandler) List(c *gin.Context) {
-	page, pageErr := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, pageSizeErr := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
-	if pageErr != nil || pageSizeErr != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"status":  "error",
-			"message": "page or pageSize is invalid",
-		})
-	}
+	defer func() {
+		if err := recover(); err != nil {
+			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": err,
+			})
+		}
+	}()
+
+	page, pageSize, _ := GetPaginationParams(c)
 
 	var tasks []model.Task
 	db.DB.Limit(pageSize).Offset((page - 1) * pageSize).Preload("User").Find(&tasks)

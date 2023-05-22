@@ -2,20 +2,23 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Task struct {
-	ID          uint /* `gorm:"primaryKey"` */
-	Key      		string `gorm:"uniqueIndex"`
+	ID          uint   /* `gorm:"primaryKey"` */
+	Key         string `gorm:"uniqueIndex"`
 	Title       string
 	Description *string
 	Status      string
 	UserID      *uint
 	User        *User
-	Watchers    []*User `gorm:"many2many:task_users"`
+	Watchers    []*User    `gorm:"many2many:task_users"`
+	Comments    []*Comment `gorm:"polymorphic:Commentable"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	// DeletedAt 	gorm.DeletedAt
+	DeletedAt   gorm.DeletedAt
 }
 
 func (t *Task) StatusName() string {

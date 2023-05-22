@@ -16,7 +16,7 @@ var err error
 
 func Connect() {
 	password := fmt.Sprintf("password=%s", config.Config.DBPassword)
-	if (config.Config.DBPassword == "") {
+	if config.Config.DBPassword == "" {
 		password = ""
 	}
 
@@ -56,9 +56,25 @@ func Seed() {
 	}
 
 	// generate 15 fake tasks
+	taskSeed()
+}
+
+func taskSeed() {
+	var randomUser model.User
+	DB.First(&randomUser)
 	for i := 0; i < 15; i++ {
 		Key := fmt.Sprintf("TASK-%d", i)
 		task := model.Task{Title: faker.Word(), Status: "todo", Key: Key}
+		task.Comments = []*model.Comment{}
+
+		for j := 0; j < 5; j++ {
+			comment := model.Comment{
+				AuthorID: randomUser.ID,
+				Comment:  faker.Paragraph(),
+			}
+			task.Comments = append(task.Comments, &comment)
+		}
+
 		DB.Create(&task)
 	}
 }

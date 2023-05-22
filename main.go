@@ -26,6 +26,8 @@ func main() {
 	profileHandler := handler.ProfileHandler{}
 	userHandler := handler.UserHandler{}
 	taskViewHandler := handler.TaskViewHandler{}
+	commentHandler := handler.CommentHandler{}
+
 	// r.LoadHTMLGlob("templates/**/*")
 	api := r.Group("/api")
 	app := r.Group("/")
@@ -45,10 +47,11 @@ func main() {
 	api.POST("/task", taskHandler.Create)
 	api.POST("/task/:key/assign", taskHandler.AssignUserToTask)
 	api.POST("/task/:key/unassign", taskHandler.AssignUserToTask)
-	// endpoint to transition task status
 	api.POST("/task/:key/transition", taskHandler.TransitionTask)
 	api.POST("/task/:key/watch", taskHandler.WatchTask)
 	api.PUT("/task/:key/edit", taskHandler.Edit)
+
+	api.GET("/comments/list", commentHandler.List)
 
 	api.GET("/user/list", userHandler.List)
 
@@ -86,6 +89,9 @@ func authorizeJWT() gin.HandlerFunc {
 		}()
 
 		tokenStr, _ := c.Cookie("token")
+		if tokenStr == "" {
+			panic("missing token")
+		}
 
 		authService := service.AuthService{}
 		claims, tokenParsed, _ := authService.GetJWTClaims(tokenStr)
