@@ -35,6 +35,10 @@ func Connect() {
 	}
 }
 
+func AutoMigrate() {
+	DB.AutoMigrate(&model.Task{}, &model.User{}, &model.Comment{})
+}
+
 func Reset() {
 	DB.Exec("DELETE FROM task_users")
 	DB.Exec("DELETE FROM tasks")

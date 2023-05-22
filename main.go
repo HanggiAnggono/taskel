@@ -5,7 +5,6 @@ import (
 	"taskel/config"
 	"taskel/db"
 	handler "taskel/handlers"
-	model "taskel/models"
 	"taskel/service"
 	"taskel/view"
 
@@ -15,7 +14,7 @@ import (
 func main() {
 	config.LoadConfig()
 	db.Connect()
-	db.DB.AutoMigrate(&model.Task{}, &model.User{})
+	db.AutoMigrate()
 	r := gin.Default()
 	r.Static("/js", "./js")
 	r.Use(IsAuthenticatedMiddleware())
