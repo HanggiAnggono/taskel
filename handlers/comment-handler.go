@@ -39,3 +39,39 @@ func (h *CommentHandler) List(c *gin.Context) {
 		"message": "success",
 	})
 }
+
+type CreateCommentRequest struct {
+	CommentableID   uint   `form:"commentable_id"`
+	CommentableType string `form:"commentable_type"`
+	Comment         string `form:"comment"`
+}
+
+func (h *CommentHandler) Create(c *gin.Context) {
+	defer func() {
+		if err := recover(); err != nil {
+			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+				"status":  "error",
+				"message": err,
+			})
+		}
+	}()
+
+  var commentReq CreateCommentRequest
+	c.ShouldBindJSON(&commentReq)
+	currentUserID := c.MustGet("userId").(uint)
+
+	comment := model.Comment{
+		CommentableID:   commentReq.CommentableID,
+		CommentableType: commentReq.CommentableType,
+		Comment:         commentReq.Comment,
+		AuthorID:        currentUserID,
+	}
+
+	db.DB.Save(&comment)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":    comment,
+		"status":  http.StatusOK,
+		"message": "success",
+	})
+}

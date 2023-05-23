@@ -52,6 +52,7 @@ func main() {
 	api.PUT("/task/:key/edit", taskHandler.Edit)
 
 	api.GET("/comments/list", commentHandler.List)
+	api.POST("/comments/list", commentHandler.Create)
 
 	api.GET("/user/list", userHandler.List)
 
