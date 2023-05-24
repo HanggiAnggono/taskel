@@ -31,7 +31,7 @@ func (h *CommentHandler) List(c *gin.Context) {
 
 	var comments []model.Comment
 
-	db.DB.Limit(pageSize).Offset((page-1)*pageSize).Preload("Author").Where("commentable_id = ? AND commentable_type = ?", params.CommentableID, params.CommentableType).Find(&comments)
+	db.DB.Limit(pageSize).Offset((page-1)*pageSize).Preload("Author").Where("commentable_id = ? AND commentable_type = ?", params.CommentableID, params.CommentableType).Order("created_at desc").Find(&comments)
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":    comments,
@@ -56,7 +56,7 @@ func (h *CommentHandler) Create(c *gin.Context) {
 		}
 	}()
 
-  var commentReq CreateCommentRequest
+	var commentReq CreateCommentRequest
 	c.ShouldBindJSON(&commentReq)
 	currentUserID := c.MustGet("userId").(uint)
 
@@ -67,7 +67,9 @@ func (h *CommentHandler) Create(c *gin.Context) {
 		AuthorID:        currentUserID,
 	}
 
-	if result := db.DB.Create(&comment); result.Error != nil { panic(result.Error.Error()) }
+	if result := db.DB.Create(&comment); result.Error != nil {
+		panic(result.Error.Error())
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":    comment,
