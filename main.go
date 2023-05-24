@@ -52,7 +52,7 @@ func main() {
 	api.PUT("/task/:key/edit", taskHandler.Edit)
 
 	api.GET("/comments/list", commentHandler.List)
-	api.POST("/comments/list", commentHandler.Create)
+	api.POST("/comments/create", commentHandler.Create)
 
 	api.GET("/user/list", userHandler.List)
 
@@ -96,10 +96,11 @@ func authorizeJWT() gin.HandlerFunc {
 
 		authService := service.AuthService{}
 		claims, tokenParsed, _ := authService.GetJWTClaims(tokenStr)
+		userId := uint(claims["userId"].(float64))
 
 		c.Set("jwtToken", tokenParsed)
-		c.Set("userId", claims["userId"])
-		view.JetView.AddGlobal("UserID", claims["userId"])
+		c.Set("userId", userId)
+		view.JetView.AddGlobal("UserID", userId)
 		c.Next()
 	}
 }

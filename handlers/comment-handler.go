@@ -41,9 +41,9 @@ func (h *CommentHandler) List(c *gin.Context) {
 }
 
 type CreateCommentRequest struct {
-	CommentableID   uint   `form:"commentable_id"`
-	CommentableType string `form:"commentable_type"`
-	Comment         string `form:"comment"`
+	CommentableID   uint   `json:"commentable_id"`
+	CommentableType string `json:"commentable_type"`
+	Comment         string `json:"comment"`
 }
 
 func (h *CommentHandler) Create(c *gin.Context) {
@@ -67,7 +67,7 @@ func (h *CommentHandler) Create(c *gin.Context) {
 		AuthorID:        currentUserID,
 	}
 
-	db.DB.Save(&comment)
+	if result := db.DB.Create(&comment); result.Error != nil { panic(result.Error.Error()) }
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":    comment,
