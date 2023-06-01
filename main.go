@@ -42,6 +42,7 @@ func main() {
 		db.Reset()
 	})
 
+	api.POST("/logout", authHandler.Logout)
 	api.GET("/profile", profileHandler.GetProfile)
 	api.GET("/task/list", taskHandler.List)
 	api.GET("/task/:key", taskHandler.Show)
