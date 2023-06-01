@@ -7,6 +7,7 @@ import (
 	handler "taskel/handlers"
 	"taskel/service"
 	"taskel/view"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -97,6 +98,12 @@ func authorizeJWT() gin.HandlerFunc {
 		authService := service.AuthService{}
 		claims, tokenParsed, _ := authService.GetJWTClaims(tokenStr)
 		userId := uint(claims["userId"].(float64))
+		if claims["exp"] != nil {
+			exp := time.Unix(int64(claims["exp"].(float64)), 0)
+			if time.Now().After(exp) {
+				panic("token has expired")
+			}
+		}
 
 		c.Set("jwtToken", tokenParsed)
 		c.Set("userId", userId)
