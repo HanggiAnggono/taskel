@@ -1,18 +1,23 @@
 package service
 
 import (
+	"fmt"
 	"taskel/config"
+	"taskel/db"
+	model "taskel/models"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
 type AuthService struct{}
 
-func (s *AuthService) GenerateJWTToken(userId uint, username string) (string, error) {
+func (s *AuthService) GenerateJWTToken(userId uint, username string, roleId *uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId":   userId,
 		"username": username,
+		"roleId":   roleId,
 		"exp":      time.Now().Add(time.Hour * 72).Unix(),
 	})
 
@@ -37,4 +42,30 @@ func (s *AuthService) GetJWTClaims(tokenString string) (jwt.MapClaims, string, e
 	}
 
 	return claims, tokenString, nil
+}
+
+func (s *AuthService) GetJWTClaimsFromContext(c *gin.Context) (jwt.MapClaims, string, error) {
+	token, _ := c.Cookie("token")
+	return s.GetJWTClaims(token)
+}
+
+func (s *AuthService) IsAuthorized(c *gin.Context, permissionName string) bool {
+	claims, _, _ := s.GetJWTClaimsFromContext(c)
+
+	roleId := claims["roleId"]
+	if roleId == nil {
+		return false
+	}
+
+	fmt.Printf("roleId: %d\n", roleId)
+	var permission model.Permission
+	db.DB.Model(&model.Permission{}).Where("name = ?", permissionName).First(&permission)
+	var count *int64
+
+	db.DB.Table("role_permissions").
+		Where("role_id = ?", roleId).
+		Where("permission_id = ?", permission.ID).
+		Count(count)
+
+	return *count > 0
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	config "taskel/config"
+	"taskel/constants"
 	model "taskel/models"
 
 	"github.com/go-faker/faker/v4"
@@ -36,10 +37,13 @@ func Connect() {
 }
 
 func AutoMigrate() {
-	DB.AutoMigrate(&model.Task{}, &model.User{}, &model.Comment{})
+	DB.AutoMigrate(&model.Task{}, &model.User{}, &model.Comment{}, &model.Permission{}, &model.Role{})
 }
 
 func Reset() {
+	DB.Exec("DELETE FROM permissions")
+	DB.Exec("DELETE FROM roles")
+	DB.Exec("DELETE FROM comments")
 	DB.Exec("DELETE FROM task_users")
 	DB.Exec("DELETE FROM tasks")
 	DB.Exec("DELETE FROM users")
@@ -57,6 +61,7 @@ func Seed() {
 
 	// generate 15 fake tasks
 	taskSeed()
+	roleAndPermissionSeed();
 }
 
 func taskSeed() {
@@ -77,4 +82,24 @@ func taskSeed() {
 
 		DB.Create(&task)
 	}
+}
+
+func roleAndPermissionSeed() {
+	permissios := []model.Permission{
+		{Name: constants.RBAC_Task_Write},
+	}
+
+	roles := []model.Role{
+		{Name: "admin", Permissions: permissios},
+		{Name: "user"},
+	}
+
+	DB.Create(&roles)
+
+	var users []model.User
+	DB.Limit(2).Find(&users)
+
+	users[0].RoleID = &roles[0].ID
+	users[1].RoleID = &roles[1].ID
+	DB.Save(&users)
 }

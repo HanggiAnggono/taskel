@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"taskel/constants"
 	"taskel/db"
 	"taskel/mail_service"
 	model "taskel/models"
 	"taskel/repository"
+	"taskel/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -108,7 +110,7 @@ type EditRequest struct {
 func (h *TaskHandler) Edit(c *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",
 				"message": r,
 			})
@@ -119,6 +121,12 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 	req := EditRequest{}
 	var task model.Task
 	c.ShouldBind(&req)
+
+	authService := service.AuthService{}
+	isAuthorized := authService.IsAuthorized(c, constants.RBAC_Task_Write)
+	if !isAuthorized {
+		panic("role is unauthorized")
+	}
 
 	db.DB.Preload("Watchers").Where("key = ?", key).First(&task)
 
@@ -174,6 +182,7 @@ type AssignRequest struct {
 	UserID *uint `json:"userId"`
 }
 
+// @deprecated
 func (h *TaskHandler) AssignUserToTask(c *gin.Context) {
 	key := c.Param("key")
 	reqBody := AssignRequest{}
@@ -209,6 +218,7 @@ type TransitionRequest struct {
 	Status string `json:"status"`
 }
 
+// Deprecated: use edit instead
 func (h *TaskHandler) TransitionTask(c *gin.Context) {
 	key := c.Param("key")
 	reqBody := TransitionRequest{}

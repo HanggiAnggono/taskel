@@ -13,6 +13,8 @@ type User struct {
 	Email     *string
 	Password  string `gorm:"type:varchar(255)"`
 	Watches   []*Task `gorm:"many2many:task_users"`
+	Role      *Role `gorm:"OnDelete:SET NULL"`
+	RoleID    *uint
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

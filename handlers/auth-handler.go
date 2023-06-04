@@ -55,7 +55,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	authService := service.AuthService{}
-	tokenString, err := authService.GenerateJWTToken(user.ID, user.Username)
+	tokenString, err := authService.GenerateJWTToken(user.ID, user.Username, user.RoleID)
 
 	if err != nil {
 		errorMessage = fmt.Sprintf("failed to sign token: %v", err)
