@@ -76,10 +76,10 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	db.DB.Save(&task)
 
 	// handle Error
-	if task.ID == 0 {
+	if db.DB.Error != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
-			"message": "failed to create task",
+			"message": fmt.Sprintf("failed to create task: %v", db.DB.Error),
 		})
 		return
 	}

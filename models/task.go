@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -19,6 +20,19 @@ type Task struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt
+}
+
+func (t *Task) BeforeCreate(tx *gorm.DB) (err error) {
+	var lastTask Task
+	if result := tx.Last(&lastTask); result.Error == nil {
+		t.ID = lastTask.ID + 1
+		t.Key = fmt.Sprintf("TASK-%d", t.ID)
+	} else if result.Error == gorm.ErrRecordNotFound {
+		t.ID = 1
+	} else {
+		err = result.Error
+	}
+	return
 }
 
 func (t *Task) StatusName() string {
