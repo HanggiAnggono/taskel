@@ -52,6 +52,7 @@ func main() {
 	api.POST("/task/:key/transition", taskHandler.TransitionTask)
 	api.POST("/task/:key/watch", taskHandler.WatchTask)
 	api.PUT("/task/:key/edit", taskHandler.Edit)
+	api.DELETE("/task/:key/delete", taskHandler.Delete)
 
 	api.GET("/comments/list", commentHandler.List)
 	api.POST("/comments/create", commentHandler.Create)

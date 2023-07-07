@@ -25,3 +25,15 @@ func TaskWatch(taskKey string, userID uint) error {
 	db.DB.Save(&task)
 	return err
 }
+
+func TaskDelete(taskKey string) error {
+	var task model.Task
+	db.DB.First(&task, "key = ?", taskKey)
+	db.DB.Delete(&task)
+
+	if db.DB.Error != nil {
+		return db.DB.Error
+	}
+
+	return nil
+}

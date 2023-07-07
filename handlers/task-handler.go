@@ -16,6 +16,33 @@ import (
 
 type TaskHandler struct{}
 
+type CreateRequest struct {
+	Title       string  `json:"title" form:"title"`
+	Status      string  `json:"status" form:"status"`
+	UserID      *uint   `json:"userId" form:"userId"`
+	Description *string `json:"description" form:"description"`
+}
+
+type EditRequest struct {
+	Title       *string `json:"title" form:"title"`
+	Status      *string `json:"status" form:"status"`
+	Description *string `json:"description" form:"description"`
+	UserID      *uint   `json:"userId" form:"userId"`
+}
+
+type AssignRequest struct {
+	UserID *uint `json:"userId"`
+}
+
+type TransitionRequest struct {
+	Status string `json:"status"`
+}
+
+type WatchTaskRequest struct {
+	UserID uint `json:"userId" form:"userId"`
+}
+
+
 func (h *TaskHandler) List(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -56,13 +83,6 @@ func (h *TaskHandler) Show(c *gin.Context) {
 	})
 }
 
-type CreateRequest struct {
-	Title       string  `json:"title" form:"title"`
-	Status      string  `json:"status" form:"status"`
-	UserID      *uint   `json:"userId" form:"userId"`
-	Description *string `json:"description" form:"description"`
-}
-
 func (h *TaskHandler) Create(c *gin.Context) {
 	var req CreateRequest
 	c.ShouldBind(&req)
@@ -98,13 +118,6 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	default:
 		c.Redirect(http.StatusMovedPermanently, "/")
 	}
-}
-
-type EditRequest struct {
-	Title       *string `json:"title" form:"title"`
-	Status      *string `json:"status" form:"status"`
-	Description *string `json:"description" form:"description"`
-	UserID      *uint   `json:"userId" form:"userId"`
 }
 
 func (h *TaskHandler) Edit(c *gin.Context) {
@@ -178,10 +191,6 @@ func (h *TaskHandler) Edit(c *gin.Context) {
 
 }
 
-type AssignRequest struct {
-	UserID *uint `json:"userId"`
-}
-
 // @deprecated
 func (h *TaskHandler) AssignUserToTask(c *gin.Context) {
 	key := c.Param("key")
@@ -214,10 +223,6 @@ func (h *TaskHandler) AssignUserToTask(c *gin.Context) {
 	}
 }
 
-type TransitionRequest struct {
-	Status string `json:"status"`
-}
-
 // Deprecated: use edit instead
 func (h *TaskHandler) TransitionTask(c *gin.Context) {
 	key := c.Param("key")
@@ -235,10 +240,6 @@ func (h *TaskHandler) TransitionTask(c *gin.Context) {
 		"status":  http.StatusOK,
 		"message": "success",
 	})
-}
-
-type WatchTaskRequest struct {
-	UserID uint `json:"userId" form:"userId"`
 }
 
 func (h *TaskHandler) WatchTask(c *gin.Context) {
@@ -276,4 +277,23 @@ func (h *TaskHandler) WatchTask(c *gin.Context) {
 	case "application/x-www-form-urlencoded":
 		c.Redirect(http.StatusMovedPermanently, taskPath)
 	}
+}
+
+func (h *TaskHandler) Delete(c *gin.Context) {
+	key := c.Param("key")
+
+	err := repository.TaskDelete(key)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+			"status":  "error",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "success",
+	})
 }
